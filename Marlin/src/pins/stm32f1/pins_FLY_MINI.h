@@ -132,7 +132,7 @@
 //
 // LCD / Controller
 //
-#define SPI_DEVICE                             2
+#define ENABLE_SPI2
 #define SS_PIN                              PB12
 #define SCK_PIN                             PB13
 #define MISO_PIN                            PB14
