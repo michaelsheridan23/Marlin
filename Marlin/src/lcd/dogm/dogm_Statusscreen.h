@@ -1375,6 +1375,9 @@
   #ifndef STATUS_LOGO_HEIGHT
     #define STATUS_LOGO_HEIGHT (sizeof(status_logo_bmp) / (STATUS_LOGO_BYTEWIDTH))
   #endif
+  #ifndef STATUS_LOGO_Y
+    #define STATUS_LOGO_Y _MAX(0U, (28U - _MIN(28U, STATUS_LOGO_HEIGHT)) / 2U)
+  #endif
   static_assert(
     sizeof(status_logo_bmp) == (STATUS_LOGO_BYTEWIDTH) * (STATUS_LOGO_HEIGHT),
     "Status logo bitmap (status_logo_bmp) dimensions don't match data."
