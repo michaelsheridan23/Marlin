@@ -70,13 +70,13 @@
 //
 // Steppers
 //
-#define X_ENABLE_PIN                        PB14
-#define X_STEP_PIN                          PB13
-#define X_DIR_PIN                           PB12
+#define X_ENABLE_PIN                        PB11
+#define X_STEP_PIN                          PB10
+#define X_DIR_PIN                           PB2
 
-#define Y_ENABLE_PIN                        PB11
-#define Y_STEP_PIN                          PB10
-#define Y_DIR_PIN                           PB2
+#define Y_ENABLE_PIN                        PB14
+#define Y_STEP_PIN                          PB13
+#define Y_DIR_PIN                           PB12
 
 #define Z_ENABLE_PIN                        PB1
 #define Z_STEP_PIN                          PB0
