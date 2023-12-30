@@ -7,7 +7,7 @@
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or 
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -686,13 +686,13 @@
   #if ENABLED(PID_PARAMS_PER_HOTEND)
     // Specify up to one value per hotend here, according to your setup.
     // If there are fewer values, the last one applies to the remaining hotends.
-    #define DEFAULT_Kp_LIST {  21.73,  21.73 }
-    #define DEFAULT_Ki_LIST {   1.54,   1.54 }
-    #define DEFAULT_Kd_LIST {  76.55,  76.55 }
+    #define DEFAULT_Kp_LIST {  26.17,  26.17 }
+    #define DEFAULT_Ki_LIST {   2.14,   2.14 }
+    #define DEFAULT_Kd_LIST {  80.09,  80.09 }
   #else
-    #define DEFAULT_Kp  21.73
-    #define DEFAULT_Ki   1.54
-    #define DEFAULT_Kd  76.55
+    #define DEFAULT_Kp  26.17
+    #define DEFAULT_Ki   2.14
+    #define DEFAULT_Kd  80.09
   #endif
 #else
   #define BANG_MAX 255    // Limit hotend current while in bang-bang mode; 255=full current
@@ -1243,7 +1243,7 @@
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 93 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 103.065 }
 
 /**
  * Default Max Feed Rate (linear=mm/s, rotational=°/s)
@@ -1579,7 +1579,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { -44, -16, 0 }
+#define NOZZLE_TO_PROBE_OFFSET { -44, -16, -3 }
 
 // Enable and set to use a specific tool for probing. Disable to allow any tool.
 #define PROBING_TOOL 0
@@ -1820,11 +1820,11 @@
 
 // The size of the printable area
 #define X_BED_SIZE 230
-#define Y_BED_SIZE 220
+#define Y_BED_SIZE 235
 
 // Travel limits (linear=mm, rotational=°) after homing, corresponding to endstop positions.
-#define X_MIN_POS -4
-#define Y_MIN_POS -17
+#define X_MIN_POS -2
+#define Y_MIN_POS -1
 #define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
