@@ -26,10 +26,6 @@
  * This may be combined with related G-codes if features are consolidated.
  */
 
-typedef struct {
-  float unload_length, load_length;
-} fil_change_settings_t;
-
 #include "../inc/MarlinConfigPre.h"
 
 #if ENABLED(ADVANCED_PAUSE_FEATURE)
@@ -48,15 +44,15 @@ enum PauseMessage : char {
   PAUSE_MESSAGE_PARKING,
   PAUSE_MESSAGE_CHANGING,
   PAUSE_MESSAGE_WAITING,
-  PAUSE_MESSAGE_UNLOAD,
   PAUSE_MESSAGE_INSERT,
   PAUSE_MESSAGE_LOAD,
+  PAUSE_MESSAGE_UNLOAD,
   PAUSE_MESSAGE_PURGE,
   PAUSE_MESSAGE_OPTION,
   PAUSE_MESSAGE_RESUME,
-  PAUSE_MESSAGE_STATUS,
   PAUSE_MESSAGE_HEAT,
-  PAUSE_MESSAGE_HEATING
+  PAUSE_MESSAGE_HEATING,
+  PAUSE_MESSAGE_STATUS
 };
 
 #if M600_PURGE_MORE_RESUMABLE
@@ -69,21 +65,27 @@ enum PauseMessage : char {
   extern PauseMode pause_mode;
 #endif
 
-extern fil_change_settings_t fc_settings[EXTRUDERS];
+typedef struct FilamentChangeSettings {
+  #if ENABLED(CONFIGURE_FILAMENT_CHANGE)
+    float load_length, unload_length;
+  #else
+    static constexpr float load_length = FILAMENT_CHANGE_FAST_LOAD_LENGTH,
+                           unload_length = FILAMENT_CHANGE_UNLOAD_LENGTH;
+  #endif
+} fil_change_settings_t;
+
+#if ENABLED(CONFIGURE_FILAMENT_CHANGE)
+  extern fil_change_settings_t fc_settings[EXTRUDERS];
+#else
+  constexpr fil_change_settings_t fc_settings[EXTRUDERS];
+#endif
 
 extern uint8_t did_pause_print;
 
-#if ENABLED(DUAL_X_CARRIAGE)
-  #define DXC_PARAMS , const int8_t DXC_ext=-1
-  #define DXC_ARGS   , const int8_t DXC_ext
-  #define DXC_PASS   , DXC_ext
-  #define DXC_SAY    , " dxc:", int(DXC_ext)
-#else
-  #define DXC_PARAMS
-  #define DXC_ARGS
-  #define DXC_PASS
-  #define DXC_SAY
-#endif
+#define DXC_PARAMS OPTARG(DUAL_X_CARRIAGE, const int8_t DXC_ext=-1)
+#define DXC_ARGS   OPTARG(DUAL_X_CARRIAGE, const int8_t DXC_ext)
+#define DXC_PASS   OPTARG(DUAL_X_CARRIAGE, DXC_ext)
+#define DXC_SAY    OPTARG(DUAL_X_CARRIAGE, " dxc:", int(DXC_ext))
 
 // Pause the print. If unload_length is set, do a Filament Unload
 bool pause_print(
@@ -124,7 +126,7 @@ bool unload_filament(
   const_float_t   unload_length,                              // (mm) Filament Unload Length - 0 to skip
   const bool      show_lcd=false,                             // Set LCD status messages?
   const PauseMode mode=PAUSE_MODE_PAUSE_PRINT                 // Pause Mode to apply
-  #if BOTH(FILAMENT_UNLOAD_ALL_EXTRUDERS, MIXING_EXTRUDER)
+  #if ALL(FILAMENT_UNLOAD_ALL_EXTRUDERS, MIXING_EXTRUDER)
     , const_float_t mix_multiplier=1.0f                       // Extrusion multiplier (for a Mixing Extruder)
   #endif
 );

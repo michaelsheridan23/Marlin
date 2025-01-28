@@ -42,8 +42,11 @@
   #define POWER_LOSS_STATE HIGH
 #endif
 
+#if DISABLED(BACKUP_POWER_SUPPLY)
+  #undef POWER_LOSS_ZRAISE    // No Z raise at outage without backup power
+#endif
 #ifndef POWER_LOSS_ZRAISE
-  #define POWER_LOSS_ZRAISE 2
+  #define POWER_LOSS_ZRAISE 2 // Default Z-raise on outage or resume
 #endif
 
 //#define DEBUG_POWER_LOSS_RECOVERY
@@ -67,8 +70,8 @@ typedef struct {
   #if HAS_HOME_OFFSET
     xyz_pos_t home_offset;
   #endif
-  #if HAS_POSITION_SHIFT
-    xyz_pos_t position_shift;
+  #if HAS_WORKSPACE_OFFSET
+    xyz_pos_t workspace_offset;
   #endif
   #if HAS_MULTI_EXTRUDER
     uint8_t active_extruder;
@@ -83,6 +86,9 @@ typedef struct {
   #endif
   #if HAS_HEATED_BED
     celsius_t target_temperature_bed;
+  #endif
+  #if HAS_HEATED_CHAMBER
+    celsius_t target_temperature_chamber;
   #endif
   #if HAS_FAN
     uint8_t fan_speed[FAN_COUNT];
@@ -113,7 +119,7 @@ typedef struct {
   millis_t print_job_elapsed;
 
   // Relative axis modes
-  uint8_t axis_relative;
+  relative_t axis_relative;
 
   // Misc. Marlin flags
   struct {
@@ -138,7 +144,7 @@ class PrintJobRecovery {
   public:
     static const char filename[5];
 
-    static SdFile file;
+    static MediaFile file;
     static job_recovery_info_t info;
 
     static uint8_t queue_index_r;     //!< Queue index of the active command
@@ -152,7 +158,10 @@ class PrintJobRecovery {
     static void init();
     static void prepare();
 
-    static inline void setup() {
+    static void setup() {
+      #if PIN_EXISTS(OUTAGECON)
+        OUT_WRITE(OUTAGECON_PIN, HIGH);
+      #endif
       #if PIN_EXISTS(POWER_LOSS)
         #if ENABLED(POWER_LOSS_PULLUP)
           SET_INPUT_PULLUP(POWER_LOSS_PIN);
@@ -165,28 +174,32 @@ class PrintJobRecovery {
     }
 
     // Track each command's file offsets
-    static inline uint32_t command_sdpos() { return sdpos[queue_index_r]; }
-    static inline void commit_sdpos(const uint8_t index_w) { sdpos[index_w] = cmd_sdpos; }
+    static uint32_t command_sdpos() { return sdpos[queue_index_r]; }
+    static void commit_sdpos(const uint8_t index_w) { sdpos[index_w] = cmd_sdpos; }
 
     static bool enabled;
     static void enable(const bool onoff);
     static void changed();
 
-    static inline bool exists() { return card.jobRecoverFileExists(); }
-    static inline void open(const bool read) { card.openJobRecoveryFile(read); }
-    static inline void close() { file.close(); }
+    #if HAS_PLR_BED_THRESHOLD
+      static celsius_t bed_temp_threshold;
+    #endif
 
-    static void check();
+    static bool exists() { return card.jobRecoverFileExists(); }
+    static void open(const bool read) { card.openJobRecoveryFile(read); }
+    static void close() { file.close(); }
+
+    static bool check();
     static void resume();
     static void purge();
 
-    static inline void cancel() { purge(); IF_DISABLED(NO_SD_AUTOSTART, card.autofile_begin()); }
+    static void cancel() { purge(); }
 
     static void load();
     static void save(const bool force=ENABLED(SAVE_EACH_CMD_MODE), const float zraise=POWER_LOSS_ZRAISE, const bool raised=false);
 
     #if PIN_EXISTS(POWER_LOSS)
-      static inline void outage() {
+      static void outage() {
         static constexpr uint8_t OUTAGE_THRESHOLD = 3;
         static uint8_t outage_counter = 0;
         if (enabled && READ(POWER_LOSS_PIN) == POWER_LOSS_STATE) {
@@ -199,14 +212,14 @@ class PrintJobRecovery {
     #endif
 
     // The referenced file exists
-    static inline bool interrupted_file_exists() { return card.fileExists(info.sd_filename); }
+    static bool interrupted_file_exists() { return card.fileExists(info.sd_filename); }
 
-    static inline bool valid() { return info.valid() && interrupted_file_exists(); }
+    static bool valid() { return info.valid() && interrupted_file_exists(); }
 
     #if ENABLED(DEBUG_POWER_LOSS_RECOVERY)
       static void debug(FSTR_P const prefix);
     #else
-      static inline void debug(FSTR_P const) {}
+      static void debug(FSTR_P const) {}
     #endif
 
   private:
@@ -216,9 +229,9 @@ class PrintJobRecovery {
       static void retract_and_lift(const_float_t zraise);
     #endif
 
-    #if PIN_EXISTS(POWER_LOSS)
+    #if PIN_EXISTS(POWER_LOSS) || ENABLED(DEBUG_POWER_LOSS_RECOVERY)
       friend class GcodeSuite;
-      static void _outage();
+      static void _outage(TERN_(DEBUG_POWER_LOSS_RECOVERY, const bool simulated=false));
     #endif
 };
 

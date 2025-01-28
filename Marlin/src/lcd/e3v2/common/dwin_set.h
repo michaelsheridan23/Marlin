@@ -25,7 +25,11 @@
 #define Language_English    1
 #define Language_Chinese    2
 
-#define ICON                7 // Icon set file 7.ICO
+#define ICON 7 // 7.ICO
+
+#ifndef CORP_WEBSITE
+  #define CORP_WEBSITE WEBSITE_URL
+#endif
 
 #define ICON_LOGO                0
 #define ICON_Print_0             1
@@ -73,7 +77,7 @@
 #define ICON_Motion             41
 #define ICON_WriteEEPROM        42
 #define ICON_ReadEEPROM         43
-#define ICON_ResumeEEPROM       44
+#define ICON_ResetEEPROM        44
 #define ICON_Info               45
 
 #define ICON_SetEndTemp         46
@@ -135,4 +139,10 @@
 #define ICON_ProbeOffsetY ICON_StepY
 #define ICON_ProbeOffsetZ ICON_StepZ
 #define ICON_PIDNozzle    ICON_SetEndTemp
-#define ICON_PIDbed       ICON_SetBedTemp
+#define ICON_PIDBed       ICON_SetBedTemp
+#define ICON_FWRetract    ICON_StepE
+#define ICON_FWRetLength  ICON_StepE
+#define ICON_FWRetSpeed   ICON_Setspeed
+#define ICON_FWRetZRaise  ICON_MoveZ
+#define ICON_FWRecSpeed   ICON_Setspeed
+#define ICON_FWRecExtra   ICON_StepE
